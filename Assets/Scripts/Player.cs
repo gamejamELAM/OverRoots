@@ -6,10 +6,13 @@ public class Player : MonoBehaviour
 {
     public float keyPressSensitivity = 3f;
     public float speed = 10.0f;
+
     public KeyCode upKey = KeyCode.UpArrow;
     public KeyCode leftKey = KeyCode.LeftArrow;
     public KeyCode downKey = KeyCode.DownArrow;
     public KeyCode rightKey = KeyCode.RightArrow;
+
+    public KeyCode interactKey = KeyCode.RightControl;
     
     float upAxis = 0f;
     float leftAxis = 0f;
@@ -20,6 +23,10 @@ public class Player : MonoBehaviour
     float verticalAxis = 0f;
 
     Rigidbody playerBody;
+
+    public Tool myTool;
+
+    Plot currentPlot = null;
 
     // Start is called before the first frame update
     void Start()
@@ -32,6 +39,11 @@ public class Player : MonoBehaviour
     {
         HandleInputAxes();
         playerBody.velocity = new Vector3(horizontalAxis * speed, playerBody.velocity.y, verticalAxis * speed);
+
+        if (Input.GetKeyDown(interactKey) && currentPlot != null && myTool != null)
+        {
+            currentPlot.PlayerInteract(myTool);
+        }
     }
 
     void HandleInputAxes()
@@ -85,5 +97,23 @@ public class Player : MonoBehaviour
 
         horizontalAxis = rightAxis - leftAxis;
         verticalAxis = upAxis - downAxis;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Debug.Log(other.tag);
+
+        if (other.tag == "Plot")
+        {
+            currentPlot = other.GetComponent<Plot>();
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.tag == "Plot")
+        {
+            currentPlot = null;
+        }
     }
 }
