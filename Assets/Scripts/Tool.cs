@@ -12,5 +12,7 @@ public class Tool : MonoBehaviour
         Seed
     }
 
+    public GameObject plantType;
+
     public ToolType toolType = ToolType.Planter;
 }

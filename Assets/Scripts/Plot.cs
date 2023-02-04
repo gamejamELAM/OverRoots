@@ -8,13 +8,19 @@ public class Plot : MonoBehaviour
     {
         Empty,
         Planter,
-        Stage1,
-        Stage2,
-        Stage3,
+        Growing,
         Finished
     }
 
     public PlotState myState = PlotState.Empty;
+
+    public GameObject myPlanter;
+    Plant myPlant;
+
+    private void Update()
+    {
+        //myMesh.mesh = 
+    }
 
     public void PlayerInteract(Tool tool)
     {
@@ -24,22 +30,27 @@ public class Plot : MonoBehaviour
         switch (tool.toolType)
         {
             case Tool.ToolType.Planter:
-                Debug.Log("Planter state is: " + myState);
-
                 if (myState == PlotState.Empty)
                 {
-                    Debug.Log("Placed a planter");
+                    Debug.Log("I worked");
                     myState = PlotState.Planter;
-                } else
-                {
-                    Debug.Log("Could not place a planter");
-                }
+                    myPlanter.SetActive(true);
+                } 
                 break;
             case Tool.ToolType.WateringCan:
+                if (myState == PlotState.Growing)
+                {
+                    myPlant.WaterPlant();
+                }
                 break;
             case Tool.ToolType.Axe:
                 break;
             case Tool.ToolType.Seed:
+                if (myState == PlotState.Planter)
+                {
+                    myState = PlotState.Growing;
+                    myPlant = Instantiate(tool.plantType, transform.position, Quaternion.identity).GetComponent<Plant>();
+                }
                 break;
         }
     }
