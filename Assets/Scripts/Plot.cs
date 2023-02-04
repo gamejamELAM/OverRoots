@@ -63,7 +63,7 @@ public class Plot : MonoBehaviour
                 if (myState == PlotState.Planter)
                 {
                     //Create the appropriate plant and track it
-                    myPlant = Instantiate(tool.plantType, transform.position, Quaternion.identity).GetComponent<Plant>();
+                    myPlant = Instantiate(tool.plantType, transform.position, Quaternion.Euler(0f, 180f, 0f)).GetComponent<Plant>();
 
                     //Change to the growing state
                     myState = PlotState.Growing;
