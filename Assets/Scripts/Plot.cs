@@ -2,54 +2,71 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum PlotState
+{
+    Empty,
+    Planter,
+    Growing,
+    Finished
+}
+
 public class Plot : MonoBehaviour
 {
-    public enum PlotState
-    {
-        Empty,
-        Planter,
-        Growing,
-        Finished
-    }
+    //Object references to the meshes attached to this Plot
+    MeshRenderer[] myMeshes;
 
-    public PlotState myState = PlotState.Empty;
+    //Tracks the state of this plot
+    PlotState myState = PlotState.Empty;
 
-    public GameObject myPlanter;
+    //Tracks the plant being grown in this plot
     Plant myPlant;
 
-    private void Update()
+    public void Start()
     {
-
+        //Find the planter mesh
+        myMeshes = GetComponentsInChildren<MeshRenderer>();
+        
+        //Turn off the planter mesh
+        foreach(MeshRenderer mesh in myMeshes)
+        {
+            mesh.enabled = false;
+        }
     }
 
     public void PlayerInteract(Tool tool)
     {
-        Debug.Log("Calling Player interact on plot: " + gameObject.name);
-        Debug.Log("Using tool " + tool.toolType);
-
         switch (tool.toolType)
         {
-            case Tool.ToolType.Planter:
+            case ToolType.Planter:
                 if (myState == PlotState.Empty)
                 {
-                    Debug.Log("I worked");
+                    // Turn on the planter mesh
+                    foreach (MeshRenderer mesh in myMeshes)
+                    {
+                        mesh.enabled = true;
+                    }
+
+                    //Move to the next stage
                     myState = PlotState.Planter;
-                    myPlanter.SetActive(true);
                 } 
                 break;
-            case Tool.ToolType.WateringCan:
+            case ToolType.WateringCan:
                 if (myState == PlotState.Growing)
                 {
+                    //Call the attached plats water method
                     myPlant.WaterPlant();
                 }
                 break;
-            case Tool.ToolType.Axe:
+            case ToolType.Axe:
                 break;
-            case Tool.ToolType.Seed:
+            case ToolType.Seed:
                 if (myState == PlotState.Planter)
                 {
-                    myState = PlotState.Growing;
+                    //Create the appropriate plant and track it
                     myPlant = Instantiate(tool.plantType, transform.position, Quaternion.identity).GetComponent<Plant>();
+
+                    //Change to the growing state
+                    myState = PlotState.Growing;
                 }
                 break;
         }
