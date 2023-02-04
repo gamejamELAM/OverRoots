@@ -5,57 +5,60 @@ using UnityEngine.UI;
 
 public class TimeHandler : MonoBehaviour
 {
-    public float timeSpeed = 1000f;
+    [Header("Time Settings")]
+    public float timeSpeed = 50f; //Multiply by deltaTime to add time to our counter
+    public float dayLength = 100f; //How long a day lasts in terms of deltaTime multiplications
 
+    [Header("Required Objects")]
     public Text date;
     public Text time;
 
+    //Management variables
     int day = 1;
     int seasonNo = 0;
-    int year = 0;
-
     float timeOfDay = 0f;
     string season = "Spring";
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
     void Update()
     {
+        //Add time to our counter
         timeOfDay = AddGameTime(timeOfDay);
 
+        //If a day worth of time passes, add to day counter and reset
         if (timeOfDay > 100f)
         {
             timeOfDay = 0f;
             day++;
         }
 
+        //If a season worth of time passes, add to season counter and reset
         if (day > 30)
         {
             day = 1;
             seasonNo++;
         }
 
+        //If a year worth of seasons passes, reset
         if (seasonNo > 3)
         {
             seasonNo = 0;
-            year++;
         }
 
+        //Update the UI elements
         date.text = GetSeason() + " " + GetDay();
         time.text = timeOfDay.ToString(".0");
     }
 
+    //Gets a formatted version of the day counter
     string GetDay()
     {
+        //Make day counter into string variable
         string dateToReturn = day.ToString();
 
+        //Get the last digit of the string variable
         string digit = dateToReturn.Substring(dateToReturn.Length);
 
+        //Attach the appropriate suffix according to the last digit
         if (digit == "1")
         {
             dateToReturn = dateToReturn + "st";
@@ -73,9 +76,11 @@ public class TimeHandler : MonoBehaviour
             dateToReturn = dateToReturn + "th";
         }
 
+        //Return the string
         return dateToReturn;
     }
 
+    //Returns a string representing the season number
     string GetSeason()
     {
         switch (seasonNo)
@@ -90,9 +95,11 @@ public class TimeHandler : MonoBehaviour
                 return "Winter";
         }
 
+        //This should never be reached as the season will not go above 3
         return "Error";
     }
 
+    //Used by plants to make sure they are tracking time at the same speed as the calendar
     public float AddGameTime(float input)
     {
         return input + Time.deltaTime * timeSpeed;

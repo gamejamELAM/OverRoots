@@ -1977,9 +1977,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   thirstLevel: 30
-  waterLevel: 100
-  startingDate: 0
-  stage: 1
+  daysToGrow: 1
   stage1: {fileID: 8553755431962390540}
   stage2: {fileID: 8553755432133450543}
   stage3: {fileID: 8553755430787326726}

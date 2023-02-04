@@ -24,6 +24,8 @@ public class Player : MonoBehaviour
 
     Rigidbody playerBody;
 
+    public Tool[] toolList;
+
     public Tool myTool;
 
     Plot currentPlot = null;

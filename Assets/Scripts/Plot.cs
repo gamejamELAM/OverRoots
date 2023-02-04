@@ -19,7 +19,7 @@ public class Plot : MonoBehaviour
 
     private void Update()
     {
-        //myMesh.mesh = 
+
     }
 
     public void PlayerInteract(Tool tool)
