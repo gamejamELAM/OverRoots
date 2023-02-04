@@ -12,6 +12,8 @@ public class TimeHandler : MonoBehaviour
 
     int day = 1;
     int seasonNo = 0;
+    int year = 0;
+
     float timeOfDay = 0f;
     string season = "Spring";
 
@@ -24,7 +26,7 @@ public class TimeHandler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        timeOfDay += Time.deltaTime * timeSpeed;
+        timeOfDay = AddGameTime(timeOfDay);
 
         if (timeOfDay > 100f)
         {
@@ -41,6 +43,7 @@ public class TimeHandler : MonoBehaviour
         if (seasonNo > 3)
         {
             seasonNo = 0;
+            year++;
         }
 
         date.text = GetSeason() + " " + GetDay();
@@ -88,5 +91,10 @@ public class TimeHandler : MonoBehaviour
         }
 
         return "Error";
+    }
+
+    public float AddGameTime(float input)
+    {
+        return input + Time.deltaTime * timeSpeed;
     }
 }
