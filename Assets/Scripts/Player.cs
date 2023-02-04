@@ -85,8 +85,5 @@ public class Player : MonoBehaviour
 
         horizontalAxis = rightAxis - leftAxis;
         verticalAxis = upAxis - downAxis;
-
-        Debug.Log("H: " + horizontalAxis);
-        Debug.Log("V: " + verticalAxis);
     }
 }
