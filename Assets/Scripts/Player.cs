@@ -7,6 +7,7 @@ public class Player : MonoBehaviour
     [Header("Player Control settings")]
     public float speed = 10.0f;
     public float acceleration = 3f;
+    public float selectionDistance = 1f;
 
     [Header("Key Bindings for this player")]
     public KeyCode upKey = KeyCode.UpArrow;
@@ -14,27 +15,38 @@ public class Player : MonoBehaviour
     public KeyCode downKey = KeyCode.DownArrow;
     public KeyCode rightKey = KeyCode.RightArrow;
     public KeyCode interactKey = KeyCode.RightControl;
+    public KeyCode unequipKey = KeyCode.RightShift;
 
     //Object references
+    public GameObject mySelectionBox;
+    public Transform equipmentPoint;
+
     Rigidbody playerBody;
+    Plot[] plotsInScene;
 
-    [Header("List of available tools")]
-    ////////////////////DEBUG
-    //List of tools
-    public Tool[] toolList;
-    int toolSelection = 0;
+    //Management variables
+    int closestPlot = -1;
+    bool atShippingBin = false;
+    bool atSeedCrate = false;
+    bool atTool = false;
 
-    //Used to track the plot the player is standing in and the tool they are holding
+    //Tracks the tool the player is holding
+    public Tool myTool = null;
+    public GameObject mySeed;
+
+    //Tracks the plot the player is standing in
     Plot currentPlot = null;
-    public Tool myTool;
+    Tool adjacentTool = null;
 
     // Start is called before the first frame update
     void Start()
     {
+        //Find various gameobject references
         playerBody = GetComponent<Rigidbody>();
+        plotsInScene = FindObjectsOfType<Plot>();
 
-        ////////////////////DEBUG
-        myTool = toolList[toolSelection];
+        //Distances are returned squared, so we need to square our selection distance
+        selectionDistance = selectionDistance * selectionDistance;
     }
 
     // Update is called once per frame
@@ -44,24 +56,74 @@ public class Player : MonoBehaviour
         Vector2 movement = HandleInputAxes();
         playerBody.velocity = new Vector3(movement.x * speed, playerBody.velocity.y, movement.y * speed);
 
-        //If the player is next to a plot, is holding a tool, and presses the interact key
-        if (Input.GetKeyDown(interactKey) && currentPlot != null && myTool != null)
+        //Set our closest distance to an unrealistic level
+        float closestDistance = 99999f;
+
+        //Loop through the list of available plots and find the closest
+        for (int i = 0; i < plotsInScene.Length; i++)
         {
-            //Call the interact method for the plot, passing in the appropriate tool
-            currentPlot.PlayerInteract(myTool);
+            //Find the distances
+            Vector3 thisPos = plotsInScene[i].gameObject.transform.position;
+            float distance = (thisPos - transform.position).sqrMagnitude;
+
+            //If this one is the current closest update our trackers
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestPlot = i;
+            }
         }
 
-        ////////////////////DEBUG
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        //If we are within range of a plot
+        if(atSeedCrate || atShippingBin)
         {
-            toolSelection++;
-
-            if(toolSelection >= toolList.Length)
+            mySelectionBox.SetActive(false);
+            currentPlot = null;
+        } 
+        else if (atTool)
+        {
+            mySelectionBox.SetActive(false);
+            currentPlot = null;
+            if (Input.GetKeyDown(interactKey))
             {
-                toolSelection = 0;
+                //Call the interact method for the plot, passing in the appropriate tool
+                adjacentTool.PlayerInteract(this);
+                atTool = false;
             }
+        }
+        else if (closestDistance < selectionDistance)
+        {
+            currentPlot = plotsInScene[closestPlot]; //Update our gameobject reference
+            mySelectionBox.SetActive(true); //Turn selection box on
+            mySelectionBox.transform.position = currentPlot.transform.position; //Move selection box to the plot position
 
-            myTool = toolList[toolSelection];
+            if (Input.GetKeyDown(interactKey))
+            {
+                if (myTool == null)
+                {
+                    currentPlot.PlayerInteract(ToolType.Planter);
+                }
+                else if (myTool.toolType == ToolType.Seed)
+                {
+                    currentPlot.PlayerInteract(mySeed, myTool, this);
+                } else
+                {
+                    currentPlot.PlayerInteract(myTool.toolType);
+                }
+            }
+        } 
+        else
+        {
+            mySelectionBox.SetActive(false);
+            currentPlot = null;
+        }
+
+        if (Input.GetKeyDown(unequipKey))
+        {
+            if (myTool != null)
+            {
+                myTool.Unequip(this);
+            }
         }
     }
 
@@ -130,19 +192,36 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        //When the player edits a plot, set it to their active plot
-        if (other.tag == "Plot")
+        if (other.tag == "ShippingBin")
         {
-            currentPlot = other.GetComponent<Plot>();
+            atShippingBin = true;
+        } 
+        else if (other.tag == "SeedCrate")
+        {
+            atSeedCrate = true;
+        } 
+        else if (other.tag == "Tool")
+        {
+            adjacentTool = other.GetComponent<Tool>();
+            atTool = true;
         }
     }
 
+
     private void OnTriggerExit(Collider other)
     {
-        //When the player exits a plot, set the plot to null
-        if (other.tag == "Plot")
+        if (other.tag == "ShippingBin")
         {
-            currentPlot = null;
+            atShippingBin = false;
+        }
+        else if (other.tag == "SeedCrate")
+        {
+            atSeedCrate = false;
+        }
+        else if (other.tag == "Tool")
+        {
+            adjacentTool = null;
+            atTool = false;
         }
     }
 }

@@ -11,7 +11,7 @@ public class TimeHandler : MonoBehaviour
 
     [Header("Required Objects")]
     public Text date;
-    public Text time;
+    public RectTransform clockHand;
 
     //Management variables
     int day = 1;
@@ -19,8 +19,14 @@ public class TimeHandler : MonoBehaviour
     float timeOfDay = 0f;
     string season = "Spring";
 
+    float handrotation = 0f;
+
     void Update()
     {
+        handrotation = (timeOfDay / dayLength) * 360f;
+
+        clockHand.rotation = Quaternion.Euler(0f,0f, 90f - handrotation);
+
         //Add time to our counter
         timeOfDay = AddGameTime(timeOfDay);
 
@@ -46,7 +52,6 @@ public class TimeHandler : MonoBehaviour
 
         //Update the UI elements
         date.text = GetSeason() + " " + GetDay();
-        time.text = timeOfDay.ToString(".0");
     }
 
     //Gets a formatted version of the day counter
@@ -56,10 +61,14 @@ public class TimeHandler : MonoBehaviour
         string dateToReturn = day.ToString();
 
         //Get the last digit of the string variable
-        string digit = dateToReturn.Substring(dateToReturn.Length);
+        string digit = dateToReturn.Substring(dateToReturn.Length - 1);
 
         //Attach the appropriate suffix according to the last digit
-        if (digit == "1")
+        if (day >= 11 && day <= 13)
+        {
+            dateToReturn = dateToReturn + "th";
+        }
+        else if (digit == "1")
         {
             dateToReturn = dateToReturn + "st";
         }

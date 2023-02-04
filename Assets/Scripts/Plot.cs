@@ -13,7 +13,7 @@ public enum PlotState
 public class Plot : MonoBehaviour
 {
     //Object references to the meshes attached to this Plot
-    MeshRenderer[] myMeshes;
+    public GameObject planter;
 
     //Tracks the state of this plot
     PlotState myState = PlotState.Empty;
@@ -23,32 +23,36 @@ public class Plot : MonoBehaviour
 
     public void Start()
     {
-        //Find the planter mesh
-        myMeshes = GetComponentsInChildren<MeshRenderer>();
-        
-        //Turn off the planter mesh
-        foreach(MeshRenderer mesh in myMeshes)
+        planter.SetActive(false);
+    }
+
+    public void PlayerInteract(GameObject seed, Tool seedBag, Player player)
+    {
+        if (myState == PlotState.Planter)
         {
-            mesh.enabled = false;
+            seedBag.Consume(player);
+
+            //Create the appropriate plant and track it
+            myPlant = Instantiate(seed, transform.position, Quaternion.Euler(0f, 180f, 0f)).GetComponent<Plant>();
+
+            //Change to the growing state
+            myState = PlotState.Growing;
         }
     }
 
-    public void PlayerInteract(Tool tool)
+    public void PlayerInteract(ToolType tool)
     {
-        switch (tool.toolType)
+        switch (tool)
         {
             case ToolType.Planter:
                 if (myState == PlotState.Empty)
                 {
                     // Turn on the planter mesh
-                    foreach (MeshRenderer mesh in myMeshes)
-                    {
-                        mesh.enabled = true;
-                    }
+                    planter.SetActive(true);
 
                     //Move to the next stage
                     myState = PlotState.Planter;
-                } 
+                }
                 break;
             case ToolType.WateringCan:
                 if (myState == PlotState.Growing)
@@ -58,16 +62,6 @@ public class Plot : MonoBehaviour
                 }
                 break;
             case ToolType.Axe:
-                break;
-            case ToolType.Seed:
-                if (myState == PlotState.Planter)
-                {
-                    //Create the appropriate plant and track it
-                    myPlant = Instantiate(tool.plantType, transform.position, Quaternion.Euler(0f, 180f, 0f)).GetComponent<Plant>();
-
-                    //Change to the growing state
-                    myState = PlotState.Growing;
-                }
                 break;
         }
     }
