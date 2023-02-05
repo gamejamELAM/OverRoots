@@ -9,6 +9,7 @@ TagManager:
   - ShippingBin
   - Tool
   - Ground
+  - Pool
   layers:
   - Default
   - TransparentFX

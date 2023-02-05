@@ -61,8 +61,11 @@ public class Plot : MonoBehaviour
             case ToolType.WateringCan:
                 if (myState == PlotState.Growing)
                 {
-                    //Call the attached plats water method
-                    myPlant.WaterPlant();
+                    if (player.UseWateringCan())
+                    {
+                        //Call the attached plats water method
+                        myPlant.WaterPlant();
+                    }
                 }
                 break;
             case ToolType.Axe:

@@ -29,6 +29,7 @@ public class Player : MonoBehaviour
     bool atShippingBin = false;
     bool atSeedCrate = false;
     bool atTool = false;
+    bool atPool = false;
 
     //Tracks the tool the player is holding
     public Tool myTool = null;
@@ -39,6 +40,8 @@ public class Player : MonoBehaviour
     Tool adjacentTool = null;
 
     public bool controlsDisabled = false;
+
+    public int wateringCanCharges = 3;
 
     // Start is called before the first frame update
     void Start()
@@ -79,12 +82,23 @@ public class Player : MonoBehaviour
             }
 
             //If we are within range of a plot
-            if (atSeedCrate)
+            if (atTool)
+            {
+                mySelectionBox.SetActive(false);
+                currentPlot = null;
+                if (Input.GetKeyDown(interactKey))
+                {
+                    //Call the interact method for the plot, passing in the appropriate tool
+                    adjacentTool.PlayerInteract(this);
+                    atTool = false;
+                }
+            }
+            else if (atSeedCrate)
             {
                 mySelectionBox.SetActive(false);
                 currentPlot = null;
 
-                if (Input.GetKeyDown(interactKey) && !atTool)
+                if (Input.GetKeyDown(interactKey))
                 {
                     FindObjectOfType<SeedCrate>().PlayerInteract(this);
                     controlsDisabled = true;
@@ -96,15 +110,14 @@ public class Player : MonoBehaviour
                 mySelectionBox.SetActive(false);
                 currentPlot = null;
             }
-            else if (atTool)
+            else if (atPool)
             {
-                mySelectionBox.SetActive(false);
-                currentPlot = null;
                 if (Input.GetKeyDown(interactKey))
                 {
-                    //Call the interact method for the plot, passing in the appropriate tool
-                    adjacentTool.PlayerInteract(this);
-                    atTool = false;
+                    if (myTool.toolType == ToolType.WateringCan)
+                    {
+                        RefillWateringCan();
+                    }
                 }
             }
             else if (closestDistance < selectionDistance)
@@ -237,5 +250,23 @@ public class Player : MonoBehaviour
             adjacentTool = null;
             atTool = false;
         }
+    }
+
+    public bool UseWateringCan()
+    {
+        if (wateringCanCharges > 0)
+        {
+            wateringCanCharges--;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public void RefillWateringCan()
+    {
+        wateringCanCharges = 3;
     }
 }
