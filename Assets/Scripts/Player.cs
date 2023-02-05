@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    public GameObject avatar;
+
     [Header("Player Control settings")]
     public float speed = 10.0f;
     public float acceleration = 3f;
@@ -168,6 +170,7 @@ public class Player : MonoBehaviour
         if (Input.GetKey(upKey))
         {
             upAxis += Time.deltaTime * acceleration;
+            avatar.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
         } else
         {
             upAxis -= Time.deltaTime * acceleration;
@@ -179,6 +182,7 @@ public class Player : MonoBehaviour
         if (Input.GetKey(downKey))
         {
             downAxis += Time.deltaTime * acceleration;
+            avatar.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
         }
         else
         {
@@ -191,6 +195,7 @@ public class Player : MonoBehaviour
         if (Input.GetKey(leftKey))
         {
             leftAxis += Time.deltaTime * acceleration;
+            avatar.transform.localRotation = Quaternion.Euler(0f, 270f, 0f);
         }
         else
         {
@@ -203,6 +208,7 @@ public class Player : MonoBehaviour
         if (Input.GetKey(rightKey))
         {
             rightAxis += Time.deltaTime * acceleration;
+            avatar.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
         }
         else
         {
