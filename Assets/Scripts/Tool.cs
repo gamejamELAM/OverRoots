@@ -4,10 +4,12 @@ using UnityEngine;
 
 public enum ToolType
 {
-    Planter,
+    Empty,
+    Hoe,
     WateringCan,
     Axe,
-    Seed
+    Seed,
+    Scythe
 }
 
 public class Tool : MonoBehaviour

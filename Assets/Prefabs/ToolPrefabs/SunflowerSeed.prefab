@@ -89,9 +89,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd0ba0052ba14b14a9eff289cf45715a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  toolType: 3
+  toolType: 4
   seed: {fileID: 8553755432183453076, guid: 09efc68c10b6759498a6273cbf9d6ee4, type: 3}
   seedName: Sunflower
+  plantName: 
+  flowerTool: {fileID: 4906447608266284711, guid: 1c3cfcd19be788d4f81de5b34dfa5b3c, type: 3}
 --- !u!1001 &3173481933567269401
 PrefabInstance:
   m_ObjectHideFlags: 0

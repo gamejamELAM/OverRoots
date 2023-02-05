@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Plant : MonoBehaviour
 {
+    public GameObject myOutcome;
+
     [Header("Plant Gameplay settings")]
     public float thirstLevel = 30f; //How fast does the plant drink water?
     public float daysToGrow = 1; //How many days does the plant take to grow one stage?
@@ -23,7 +25,7 @@ public class Plant : MonoBehaviour
     float timeAlive = 0; //How long have we been planted for?
     float waterLevel = 100f; //How much water do we have?
     int stage = 1; //What stage of growth is the plant at?
-    bool isGrown = false; //Are we fully grown?
+    public bool isGrown = false; //Are we fully grown?
     float stageLength = 0f;
 
     private void Start()
@@ -91,21 +93,21 @@ public class Plant : MonoBehaviour
                 stage4.SetActive(false);
                 break;
             case 2:
-                stage1.SetActive(true);
+                stage1.SetActive(false);
                 stage2.SetActive(true);
                 stage3.SetActive(false);
                 stage4.SetActive(false);
                 break;
             case 3:
-                stage1.SetActive(true);
-                stage2.SetActive(true);
+                stage1.SetActive(false);
+                stage2.SetActive(false);
                 stage3.SetActive(true);
                 stage4.SetActive(false);
                 break;
             case 4:
-                stage1.SetActive(true);
-                stage2.SetActive(true);
-                stage3.SetActive(true);
+                stage1.SetActive(false);
+                stage2.SetActive(false);
+                stage3.SetActive(false);
                 stage4.SetActive(true);
                 break;
         }

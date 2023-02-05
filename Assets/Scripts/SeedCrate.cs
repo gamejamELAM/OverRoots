@@ -13,6 +13,7 @@ public class SeedCrate : MonoBehaviour
     float spacing = -45f;
 
     Player activePlayer;
+    bool tempDisable = false;
 
     List<Image> images = new List<Image>();
     int selection = 0;
@@ -32,7 +33,7 @@ public class SeedCrate : MonoBehaviour
 
     private void Update()
     {
-        if (activePlayer != null)
+        if ((activePlayer != null) && (tempDisable == false))
         {
             for (int i = 0; i < images.Count; i++)
             {
@@ -64,10 +65,20 @@ public class SeedCrate : MonoBehaviour
 
             selection = Mathf.Clamp(selection, 0, images.Count - 1);
         }
+
+        if (activePlayer != null)
+        {
+            if (Input.GetKeyUp(activePlayer.interactKey))
+            {
+                tempDisable = false;
+            }
+        }
     }
+
 
     public void PlayerInteract(Player player)
     {
+        tempDisable = true;
         seedCratePanel.SetActive(true);
         activePlayer = player;
     }

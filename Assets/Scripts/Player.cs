@@ -84,12 +84,11 @@ public class Player : MonoBehaviour
                 mySelectionBox.SetActive(false);
                 currentPlot = null;
 
-                if (Input.GetKeyDown(interactKey))
+                if (Input.GetKeyDown(interactKey) && !atTool)
                 {
                     FindObjectOfType<SeedCrate>().PlayerInteract(this);
                     controlsDisabled = true;
                     atSeedCrate = false;
-                    Debug.Log("aha");
                 }
             }
             else if (atShippingBin)
@@ -114,19 +113,15 @@ public class Player : MonoBehaviour
                 mySelectionBox.SetActive(true); //Turn selection box on
                 mySelectionBox.transform.position = currentPlot.transform.position; //Move selection box to the plot position
 
-                if (Input.GetKeyDown(interactKey))
+                if (Input.GetKeyDown(interactKey) && myTool != null)
                 {
-                    if (myTool == null)
-                    {
-                        currentPlot.PlayerInteract(ToolType.Planter);
-                    }
-                    else if (myTool.toolType == ToolType.Seed)
+                    if (myTool.toolType == ToolType.Seed)
                     {
                         currentPlot.PlayerInteract(mySeed, myTool, this);
                     }
                     else
                     {
-                        currentPlot.PlayerInteract(myTool.toolType);
+                        currentPlot.PlayerInteract(myTool.toolType, this);
                     }
                 }
             }

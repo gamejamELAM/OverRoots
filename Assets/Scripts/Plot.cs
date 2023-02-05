@@ -7,16 +7,18 @@ public enum PlotState
     Empty,
     Planter,
     Growing,
-    Finished
+    Finished,
+    Rooted
 }
 
 public class Plot : MonoBehaviour
 {
     //Object references to the meshes attached to this Plot
     public GameObject planter;
+    public GameObject myRoot;
 
     //Tracks the state of this plot
-    PlotState myState = PlotState.Empty;
+    public PlotState myState = PlotState.Empty;
 
     //Tracks the plant being grown in this plot
     Plant myPlant;
@@ -28,7 +30,7 @@ public class Plot : MonoBehaviour
 
     public void PlayerInteract(GameObject seed, Tool seedBag, Player player)
     {
-        if (myState == PlotState.Planter)
+        if ((myState == PlotState.Planter) && (seedBag.toolType == ToolType.Seed))
         {
             seedBag.Consume(player);
 
@@ -40,11 +42,13 @@ public class Plot : MonoBehaviour
         }
     }
 
-    public void PlayerInteract(ToolType tool)
+    public void PlayerInteract(ToolType tool, Player player)
     {
         switch (tool)
         {
-            case ToolType.Planter:
+            case ToolType.Empty:
+                break;
+            case ToolType.Hoe:
                 if (myState == PlotState.Empty)
                 {
                     // Turn on the planter mesh
@@ -62,7 +66,60 @@ public class Plot : MonoBehaviour
                 }
                 break;
             case ToolType.Axe:
+                if (myPlant != null)
+                {
+                    Destroy(myPlant.gameObject);
+                    myPlant = null;
+                }
+
+                planter.SetActive(false);
+
+                if (myState == PlotState.Rooted)
+                {
+                    bool stillAlive = myRoot.GetComponent<Root>().TakeHit();
+
+                    if (!stillAlive)
+                    {
+                        planter.SetActive(false);
+                        myState = PlotState.Empty;
+                    }
+                }
+                else
+                {
+                    myState = PlotState.Empty;
+                }
+                break;
+            case ToolType.Scythe:
+                if (myState == PlotState.Growing)
+                {
+                    if (myPlant != null)
+                    {
+                        if (myPlant.isGrown)
+                        {
+                            //Add to successful plant counter
+                        }
+
+                        Destroy(myPlant.gameObject);
+                        myPlant = null;
+                    }
+
+                    myState = PlotState.Planter;
+                }
+                break;
+            default:
                 break;
         }
+    }
+
+    public void GetRooted()
+    {
+        if (myPlant != null)
+        {
+            Destroy(myPlant.gameObject);
+            myPlant = null;
+        }
+
+        myRoot.SetActive(true);
+        myState = PlotState.Rooted;
     }
 }
