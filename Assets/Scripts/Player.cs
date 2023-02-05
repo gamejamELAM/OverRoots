@@ -316,12 +316,12 @@ public class Player : MonoBehaviour
 
     public void RefillWateringCan()
     {
-        Debug.Log("rEFILL");
         wateringCanCharges = 3;
     }
 
     public void AddToToolList(Tool toAdd)
     {
+        Debug.Log("Adding: " + toAdd);
         toolsInScene.Add(toAdd);
     }
 

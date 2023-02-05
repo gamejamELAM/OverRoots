@@ -65,7 +65,7 @@ public class SeedCrate : MonoBehaviour
 
                 foreach(Player player in playersInScene)
                 {
-                    player.AddToToolList(seeds[selection].GetComponent<Tool>());
+                    player.AddToToolList(seed.GetComponent<Tool>());
                 }
 
                 activePlayer.controlsDisabled = false;
