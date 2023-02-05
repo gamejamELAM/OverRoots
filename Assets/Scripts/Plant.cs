@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class Plant : MonoBehaviour
 {
-    public GameObject myOutcome;
-
     [Header("Plant Gameplay settings")]
     public float thirstLevel = 30f; //How fast does the plant drink water?
     public float daysToGrow = 1; //How many days does the plant take to grow one stage?

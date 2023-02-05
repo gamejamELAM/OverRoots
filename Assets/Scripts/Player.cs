@@ -231,6 +231,9 @@ public class Player : MonoBehaviour
         {
             adjacentTool = other.GetComponent<Tool>();
             atTool = true;
+        } else if (other.tag == "Pool")
+        {
+            atPool = true;
         }
     }
 
@@ -250,6 +253,10 @@ public class Player : MonoBehaviour
             adjacentTool = null;
             atTool = false;
         }
+        else if (other.tag == "Pool")
+        {
+            atPool = false;
+        }
     }
 
     public bool UseWateringCan()
@@ -267,6 +274,7 @@ public class Player : MonoBehaviour
 
     public void RefillWateringCan()
     {
+        Debug.Log("rEFILL");
         wateringCanCharges = 3;
     }
 }
