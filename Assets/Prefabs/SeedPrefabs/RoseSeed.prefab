@@ -90,10 +90,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7472128048533881658}
-  - component: {fileID: 1256868518043258058}
-  - component: {fileID: 6262672500730133164}
   - component: {fileID: 7300280875441600085}
   - component: {fileID: 2357102231471122928}
+  - component: {fileID: 7690700767466142569}
   m_Layer: 0
   m_Name: RoseSeed
   m_TagString: Tool
@@ -116,35 +115,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &1256868518043258058
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4832186710051102771}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 112
-  m_CollisionDetection: 0
---- !u!65 &6262672500730133164
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4832186710051102771}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 2.7104237, y: 1.675356, z: 2.4706702}
-  m_Center: {x: 0.06515893, y: 1.448047, z: 0.08243949}
 --- !u!65 &7300280875441600085
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -173,3 +143,20 @@ MonoBehaviour:
   toolType: 4
   seed: {fileID: 2059721998837947819, guid: 4dc05bce8d10264419f07185d35b49f7, type: 3}
   seedName: Rose
+  myVisuals: {fileID: 423618346957348222}
+--- !u!54 &7690700767466142569
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4832186710051102771}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0

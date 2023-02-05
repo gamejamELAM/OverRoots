@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public enum ToolType
@@ -24,18 +25,15 @@ public class Tool : MonoBehaviour
 
     Player equippedPlayer;
 
+    Player[] playersInScene;
+
+    public GameObject myVisuals;
+
     private void Start()
     {
+        playersInScene = FindObjectsOfType<Player>();
         myRigidbody = GetComponent<Rigidbody>();
         myColliders = GetComponents<BoxCollider>();
-    }
-
-    private void Update()
-    {
-        if (isEquipped)
-        {
-            transform.position = equippedPlayer.equipmentPoint.position;
-        }
     }
 
     public ToolType PlayerInteract(Player player)
@@ -57,6 +55,8 @@ public class Tool : MonoBehaviour
             collider.enabled = false;
         }
 
+        myVisuals.SetActive(false);
+
         player.myTool = this;
         player.mySeed = seed;
 
@@ -69,6 +69,9 @@ public class Tool : MonoBehaviour
         player.myTool = null;
         player.mySeed = null;
 
+        myVisuals.SetActive(true);
+
+        transform.position = player.transform.position + Vector3.up;
         myRigidbody.velocity = new Vector3(0f, 3f, 3f);
 
         foreach (BoxCollider collider in myColliders)
@@ -78,14 +81,17 @@ public class Tool : MonoBehaviour
 
         equippedPlayer = null;
         isEquipped = false;
-
-
     }
 
     public void Consume(Player player)
     {
         player.myTool = null;
         player.mySeed = null;
+
+        foreach (Player play in playersInScene)
+        {
+            play.TakeFromToolList(this);
+        }
 
         Destroy(gameObject);
     }

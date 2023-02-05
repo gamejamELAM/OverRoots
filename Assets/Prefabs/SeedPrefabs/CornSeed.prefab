@@ -91,7 +91,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5241675282668145494}
   - component: {fileID: 4502812896353191078}
-  - component: {fileID: 8783431388639097536}
   - component: {fileID: 5351316486579240505}
   - component: {fileID: 1133329063514268060}
   m_Layer: 0
@@ -132,19 +131,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!65 &8783431388639097536
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7783098730689636447}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 2.7104237, y: 1.675356, z: 2.4706702}
-  m_Center: {x: 0.06515893, y: 1.448047, z: 0.08243949}
 --- !u!65 &5351316486579240505
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -173,3 +159,4 @@ MonoBehaviour:
   toolType: 4
   seed: {fileID: 7121999885509684379, guid: 379fc897749b9bd43b2cdeda9457358d, type: 3}
   seedName: Corn
+  myVisuals: {fileID: 3092989561861707026}

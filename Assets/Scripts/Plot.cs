@@ -54,6 +54,8 @@ public class Plot : MonoBehaviour
                     // Turn on the planter mesh
                     planter.SetActive(true);
 
+                    player.animator.SetTrigger("Plant Seed");
+
                     //Move to the next stage
                     myState = PlotState.Planter;
                 }
@@ -61,6 +63,7 @@ public class Plot : MonoBehaviour
             case ToolType.WateringCan:
                 if (myState == PlotState.Growing)
                 {
+                    player.animator.SetTrigger("Water Plant");
                     if (player.UseWateringCan())
                     {
                         //Call the attached plats water method
@@ -69,6 +72,8 @@ public class Plot : MonoBehaviour
                 }
                 break;
             case ToolType.Axe:
+                player.animator.SetTrigger("Swing Tool");
+
                 if (myPlant != null)
                 {
                     Destroy(myPlant.gameObject);
@@ -93,6 +98,8 @@ public class Plot : MonoBehaviour
                 }
                 break;
             case ToolType.Scythe:
+                player.animator.SetTrigger("Swing Tool");
+
                 if (myState == PlotState.Growing)
                 {
                     if (myPlant != null)

@@ -18,9 +18,13 @@ public class SeedCrate : MonoBehaviour
     List<Image> images = new List<Image>();
     int selection = 0;
 
+    Player[] playersInScene;
+
     // Start is called before the first frame update
     void Start()
     {
+        playersInScene = FindObjectsOfType<Player>();
+
         for (int i = 0; i < seeds.Length; i++)
         {
             GameObject choice = Instantiate(optionButton, startPoint.position + new Vector3(0f, i * spacing, 0f), Quaternion.identity, seedCratePanel.transform);
@@ -58,6 +62,11 @@ public class SeedCrate : MonoBehaviour
 
                 GameObject seed = Instantiate(seeds[selection], creationPoint.position, Quaternion.identity);
                 seed.GetComponent<Rigidbody>().velocity = new Vector3(0f, 3f, -3f);
+
+                foreach(Player player in playersInScene)
+                {
+                    player.AddToToolList(seeds[selection].GetComponent<Tool>());
+                }
 
                 activePlayer.controlsDisabled = false;
                 activePlayer = null;

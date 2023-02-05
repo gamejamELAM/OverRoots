@@ -10,6 +10,7 @@ public class Player : MonoBehaviour
     public float speed = 10.0f;
     public float acceleration = 3f;
     public float selectionDistance = 1f;
+    public float toolSelectionDistance = 2f;
 
     [Header("Key Bindings for this player")]
     public KeyCode upKey = KeyCode.UpArrow;
@@ -24,11 +25,14 @@ public class Player : MonoBehaviour
     public Transform equipmentPoint;
 
     Rigidbody playerBody;
-    Plot[] plotsInScene;
+    List<Plot> plotsInScene = new List<Plot>();
+    List<Tool> toolsInScene = new List<Tool>();
+
+    public Animator animator;
 
     //Management variables
     int closestPlot = -1;
-    bool atShippingBin = false;
+    int closestTool = -1;
     bool atSeedCrate = false;
     bool atTool = false;
     bool atPool = false;
@@ -50,38 +54,90 @@ public class Player : MonoBehaviour
     {
         //Find various gameobject references
         playerBody = GetComponent<Rigidbody>();
-        plotsInScene = FindObjectsOfType<Plot>();
+
+        Plot[] plots = FindObjectsOfType<Plot>();
+        foreach(Plot plot in plots)
+        {
+            plotsInScene.Add(plot);
+        }
+
+        Tool[] tools = FindObjectsOfType<Tool>();
+        foreach (Tool tool in tools)
+        {
+            toolsInScene.Add(tool);
+        }
 
         //Distances are returned squared, so we need to square our selection distance
         selectionDistance = selectionDistance * selectionDistance;
+        toolSelectionDistance = toolSelectionDistance * toolSelectionDistance;
     }
 
     // Update is called once per frame
     void Update()
     {
+        foreach(Tool tool in toolsInScene)
+        {
+            Debug.Log(tool.gameObject.name);
+        }
+
         if (controlsDisabled == false)
         {
             //Get the amount we should be moving and apply it
             Vector2 movement = HandleInputAxes();
+
+            animator.SetFloat("Movement", movement.SqrMagnitude());
+
             playerBody.velocity = new Vector3(movement.x * speed, playerBody.velocity.y, movement.y * speed);
 
             //Set our closest distance to an unrealistic level
-            float closestDistance = 99999f;
+            float closestPlotDistance = 99999f;
 
             //Loop through the list of available plots and find the closest
-            for (int i = 0; i < plotsInScene.Length; i++)
+            for (int i = 0; i < plotsInScene.Count; i++)
             {
                 //Find the distances
                 Vector3 thisPos = plotsInScene[i].gameObject.transform.position;
                 float distance = (thisPos - transform.position).sqrMagnitude;
 
                 //If this one is the current closest update our trackers
-                if (distance < closestDistance)
+                if (distance < closestPlotDistance)
                 {
-                    closestDistance = distance;
+                    closestPlotDistance = distance;
                     closestPlot = i;
                 }
             }
+
+            float closestToolDistance = 99999f;
+
+            for (int i = 0; i < toolsInScene.Count; i++)
+            {
+                if (toolsInScene[i] != myTool)
+                {
+                    //Find the distances
+                    Vector3 thisPos = toolsInScene[i].gameObject.transform.position;
+                    float distance = (thisPos - transform.position).sqrMagnitude;
+
+                    //If this one is the current closest update our trackers
+                    if (distance < closestToolDistance)
+                    {
+                        closestToolDistance = distance;
+                        closestTool = i;
+                    }
+                }
+            }
+
+            if (closestToolDistance < toolSelectionDistance)
+            {
+                atTool = true;
+                adjacentTool = toolsInScene[closestTool];
+            } 
+            else
+            {
+                atTool = false;
+                adjacentTool = null;
+            }
+
+            Debug.Log(atTool);
 
             //If we are within range of a plot
             if (atTool)
@@ -92,7 +148,6 @@ public class Player : MonoBehaviour
                 {
                     //Call the interact method for the plot, passing in the appropriate tool
                     adjacentTool.PlayerInteract(this);
-                    atTool = false;
                 }
             }
             else if (atSeedCrate)
@@ -107,22 +162,20 @@ public class Player : MonoBehaviour
                     atSeedCrate = false;
                 }
             }
-            else if (atShippingBin)
-            {
-                mySelectionBox.SetActive(false);
-                currentPlot = null;
-            }
             else if (atPool)
             {
                 if (Input.GetKeyDown(interactKey))
                 {
-                    if (myTool.toolType == ToolType.WateringCan)
+                    if (myTool != null)
                     {
-                        RefillWateringCan();
+                        if (myTool.toolType == ToolType.WateringCan)
+                        {
+                            RefillWateringCan();
+                        }
                     }
                 }
             }
-            else if (closestDistance < selectionDistance)
+            else if (closestPlotDistance < selectionDistance)
             {
                 currentPlot = plotsInScene[closestPlot]; //Update our gameobject reference
                 mySelectionBox.SetActive(true); //Turn selection box on
@@ -225,19 +278,11 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "ShippingBin")
-        {
-            atShippingBin = true;
-        } 
-        else if (other.tag == "SeedCrate")
+        if (other.tag == "SeedCrate")
         {
             atSeedCrate = true;
         } 
-        else if (other.tag == "Tool")
-        {
-            adjacentTool = other.GetComponent<Tool>();
-            atTool = true;
-        } else if (other.tag == "Pool")
+        else if (other.tag == "Pool")
         {
             atPool = true;
         }
@@ -246,18 +291,9 @@ public class Player : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.tag == "ShippingBin")
-        {
-            atShippingBin = false;
-        }
-        else if (other.tag == "SeedCrate")
+        if (other.tag == "SeedCrate")
         {
             atSeedCrate = false;
-        }
-        else if (other.tag == "Tool")
-        {
-            adjacentTool = null;
-            atTool = false;
         }
         else if (other.tag == "Pool")
         {
@@ -282,5 +318,15 @@ public class Player : MonoBehaviour
     {
         Debug.Log("rEFILL");
         wateringCanCharges = 3;
+    }
+
+    public void AddToToolList(Tool toAdd)
+    {
+        toolsInScene.Add(toAdd);
+    }
+
+    public void TakeFromToolList(Tool toTake)
+    {
+        toolsInScene.Remove(toTake);
     }
 }

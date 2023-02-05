@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using UnityEngine;
 
 public class Root : MonoBehaviour
 {
     public int myHealth = 3;
 
-    float timeToPropagate = 1.0f;
+    float timeToPropagate = 3.0f;
     bool hasSpawned = false;
 
     bool fullyGrown = false;
@@ -17,10 +18,18 @@ public class Root : MonoBehaviour
 
     Root rootThatISpawned = null;
 
+    public bool shouldRotate = true;
+
     // Start is called before the first frame update
     public void Start()
     {
         plotsInScene = FindObjectsOfType<Plot>();
+
+        if (shouldRotate)
+        {
+            transform.localRotation = Quaternion.Euler(transform.localRotation.eulerAngles.x, Random.Range(0f, 360f), transform.localRotation.eulerAngles.z);
+        }
+        
     }
 
     // Update is called once per frame
@@ -29,7 +38,7 @@ public class Root : MonoBehaviour
         if (fullyGrown == false)
         {
             float currentScale = transform.localScale.y;
-            currentScale *= 1.001f;
+            currentScale += (1.0f * Time.deltaTime);
 
             if (currentScale > 1.0f)
             {
