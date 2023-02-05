@@ -111,10 +111,18 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2233159609872564409, guid: c9fddfc4c16cdf6488628c966a44b2f6, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: ec1c5c70907c7f048b81e1e48ffa3303, type: 2}
     - target: {fileID: 2714565966457130703, guid: c9fddfc4c16cdf6488628c966a44b2f6, type: 3}
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2714565966457130703, guid: c9fddfc4c16cdf6488628c966a44b2f6, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 67de08380cba4be4788b2449a7ad5463, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c9fddfc4c16cdf6488628c966a44b2f6, type: 3}
 --- !u!1 &1497141852825922746 stripped
@@ -222,3 +230,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e42764edbd40b5a428bccbde6ad86e24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myHealth: 3
