@@ -14,6 +14,7 @@ public class Tool : MonoBehaviour
 {
     public ToolType toolType = ToolType.WateringCan;
     public GameObject seed;
+    public string seedName;
 
     bool isEquipped = false;
     BoxCollider[] myColliders;
@@ -66,7 +67,7 @@ public class Tool : MonoBehaviour
         player.myTool = null;
         player.mySeed = null;
 
-        myRigidbody.AddForce(new Vector3(0f, 200f, 0f));
+        myRigidbody.velocity = new Vector3(0f, 3f, 3f);
 
         foreach (BoxCollider collider in myColliders)
         {

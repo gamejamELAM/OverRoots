@@ -38,6 +38,8 @@ public class Player : MonoBehaviour
     Plot currentPlot = null;
     Tool adjacentTool = null;
 
+    public bool controlsDisabled = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -52,77 +54,94 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Get the amount we should be moving and apply it
-        Vector2 movement = HandleInputAxes();
-        playerBody.velocity = new Vector3(movement.x * speed, playerBody.velocity.y, movement.y * speed);
-
-        //Set our closest distance to an unrealistic level
-        float closestDistance = 99999f;
-
-        //Loop through the list of available plots and find the closest
-        for (int i = 0; i < plotsInScene.Length; i++)
+        if (controlsDisabled == false)
         {
-            //Find the distances
-            Vector3 thisPos = plotsInScene[i].gameObject.transform.position;
-            float distance = (thisPos - transform.position).sqrMagnitude;
+            //Get the amount we should be moving and apply it
+            Vector2 movement = HandleInputAxes();
+            playerBody.velocity = new Vector3(movement.x * speed, playerBody.velocity.y, movement.y * speed);
 
-            //If this one is the current closest update our trackers
-            if (distance < closestDistance)
+            //Set our closest distance to an unrealistic level
+            float closestDistance = 99999f;
+
+            //Loop through the list of available plots and find the closest
+            for (int i = 0; i < plotsInScene.Length; i++)
             {
-                closestDistance = distance;
-                closestPlot = i;
-            }
-        }
+                //Find the distances
+                Vector3 thisPos = plotsInScene[i].gameObject.transform.position;
+                float distance = (thisPos - transform.position).sqrMagnitude;
 
-        //If we are within range of a plot
-        if(atSeedCrate || atShippingBin)
-        {
-            mySelectionBox.SetActive(false);
-            currentPlot = null;
-        } 
-        else if (atTool)
-        {
-            mySelectionBox.SetActive(false);
-            currentPlot = null;
-            if (Input.GetKeyDown(interactKey))
-            {
-                //Call the interact method for the plot, passing in the appropriate tool
-                adjacentTool.PlayerInteract(this);
-                atTool = false;
-            }
-        }
-        else if (closestDistance < selectionDistance)
-        {
-            currentPlot = plotsInScene[closestPlot]; //Update our gameobject reference
-            mySelectionBox.SetActive(true); //Turn selection box on
-            mySelectionBox.transform.position = currentPlot.transform.position; //Move selection box to the plot position
-
-            if (Input.GetKeyDown(interactKey))
-            {
-                if (myTool == null)
+                //If this one is the current closest update our trackers
+                if (distance < closestDistance)
                 {
-                    currentPlot.PlayerInteract(ToolType.Planter);
-                }
-                else if (myTool.toolType == ToolType.Seed)
-                {
-                    currentPlot.PlayerInteract(mySeed, myTool, this);
-                } else
-                {
-                    currentPlot.PlayerInteract(myTool.toolType);
+                    closestDistance = distance;
+                    closestPlot = i;
                 }
             }
-        } 
-        else
-        {
-            mySelectionBox.SetActive(false);
-            currentPlot = null;
-        }
 
-        if (Input.GetKeyDown(unequipKey))
-        {
-            if (myTool != null)
+            //If we are within range of a plot
+            if (atSeedCrate)
             {
-                myTool.Unequip(this);
+                mySelectionBox.SetActive(false);
+                currentPlot = null;
+
+                if (Input.GetKeyDown(interactKey))
+                {
+                    FindObjectOfType<SeedCrate>().PlayerInteract(this);
+                    controlsDisabled = true;
+                    atSeedCrate = false;
+                    Debug.Log("aha");
+                }
+            }
+            else if (atShippingBin)
+            {
+                mySelectionBox.SetActive(false);
+                currentPlot = null;
+            }
+            else if (atTool)
+            {
+                mySelectionBox.SetActive(false);
+                currentPlot = null;
+                if (Input.GetKeyDown(interactKey))
+                {
+                    //Call the interact method for the plot, passing in the appropriate tool
+                    adjacentTool.PlayerInteract(this);
+                    atTool = false;
+                }
+            }
+            else if (closestDistance < selectionDistance)
+            {
+                currentPlot = plotsInScene[closestPlot]; //Update our gameobject reference
+                mySelectionBox.SetActive(true); //Turn selection box on
+                mySelectionBox.transform.position = currentPlot.transform.position; //Move selection box to the plot position
+
+                if (Input.GetKeyDown(interactKey))
+                {
+                    if (myTool == null)
+                    {
+                        currentPlot.PlayerInteract(ToolType.Planter);
+                    }
+                    else if (myTool.toolType == ToolType.Seed)
+                    {
+                        currentPlot.PlayerInteract(mySeed, myTool, this);
+                    }
+                    else
+                    {
+                        currentPlot.PlayerInteract(myTool.toolType);
+                    }
+                }
+            }
+            else
+            {
+                mySelectionBox.SetActive(false);
+                currentPlot = null;
+            }
+
+            if (Input.GetKeyDown(unequipKey))
+            {
+                if (myTool != null)
+                {
+                    myTool.Unequip(this);
+                }
             }
         }
     }
