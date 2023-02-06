@@ -28,6 +28,7 @@ public class Tool : MonoBehaviour
     Player[] playersInScene;
 
     public GameObject myVisuals;
+    public Light myLight;
 
     private void Start()
     {
@@ -56,6 +57,7 @@ public class Tool : MonoBehaviour
         }
 
         myVisuals.SetActive(false);
+        myLight.enabled = false;
 
         player.myTool = this;
         player.mySeed = seed;
@@ -70,6 +72,7 @@ public class Tool : MonoBehaviour
         player.mySeed = null;
 
         myVisuals.SetActive(true);
+        myLight.enabled = true;
 
         transform.position = player.transform.position + Vector3.up;
         myRigidbody.velocity = new Vector3(0f, 3f, 3f);

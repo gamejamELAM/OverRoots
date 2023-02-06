@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PickUpLife : MonoBehaviour
 {
+    public float limit = 0.2f;
+    public float speed = 2.0f;
     float timeOffset;
 
     private void Start()
@@ -14,6 +16,6 @@ public class PickUpLife : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.localPosition = new Vector3(transform.localPosition.x, (Mathf.Sin(timeOffset + (Time.time * 2f))) * 0.2f, transform.localPosition.z);
+        transform.localPosition = new Vector3(transform.localPosition.x, (Mathf.Sin(timeOffset + (Time.time * speed))) * limit, transform.localPosition.z);
     }
 }

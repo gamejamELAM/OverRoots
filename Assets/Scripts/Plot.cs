@@ -34,6 +34,9 @@ public class Plot : MonoBehaviour
         {
             seedBag.Consume(player);
 
+            player.animator.SetTrigger("Plant Seed");
+            player.ActionPause();
+
             //Create the appropriate plant and track it
             myPlant = Instantiate(seed, transform.position, Quaternion.Euler(0f, 180f, 0f)).GetComponent<Plant>();
 
@@ -54,16 +57,20 @@ public class Plot : MonoBehaviour
                     // Turn on the planter mesh
                     planter.SetActive(true);
 
-                    player.animator.SetTrigger("Plant Seed");
+                    player.animator.SetTrigger("Use Hoe");
+                    player.ActionPause();
 
                     //Move to the next stage
                     myState = PlotState.Planter;
                 }
                 break;
             case ToolType.WateringCan:
+                player.animator.SetTrigger("Water Plant");
+                player.ActionPause();
+                player.UseWateringCan();
+
                 if (myState == PlotState.Growing)
                 {
-                    player.animator.SetTrigger("Water Plant");
                     if (player.UseWateringCan())
                     {
                         //Call the attached plats water method
@@ -73,6 +80,7 @@ public class Plot : MonoBehaviour
                 break;
             case ToolType.Axe:
                 player.animator.SetTrigger("Swing Tool");
+                player.ActionPause();
 
                 if (myPlant != null)
                 {
@@ -99,6 +107,7 @@ public class Plot : MonoBehaviour
                 break;
             case ToolType.Scythe:
                 player.animator.SetTrigger("Swing Tool");
+                player.ActionPause();
 
                 if (myState == PlotState.Growing)
                 {

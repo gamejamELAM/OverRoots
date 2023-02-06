@@ -6,6 +6,11 @@ public class Player : MonoBehaviour
 {
     public GameObject avatar;
 
+    public GameObject hoeVisual;
+    public GameObject axeVisual;
+    public GameObject canVisual;
+    public GameObject scythVisual;
+
     [Header("Player Control settings")]
     public float speed = 10.0f;
     public float acceleration = 3f;
@@ -30,6 +35,8 @@ public class Player : MonoBehaviour
 
     public Animator animator;
 
+    public Transform selectionPoint;
+
     //Management variables
     int closestPlot = -1;
     int closestTool = -1;
@@ -45,9 +52,12 @@ public class Player : MonoBehaviour
     Plot currentPlot = null;
     Tool adjacentTool = null;
 
+    public bool pauseForAnim = false;
     public bool controlsDisabled = false;
 
     public int wateringCanCharges = 3;
+
+    float animTime = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -75,12 +85,16 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        foreach(Tool tool in toolsInScene)
+        if (pauseForAnim == true)
         {
-            Debug.Log(tool.gameObject.name);
+            Debug.Log(animator.GetCurrentAnimatorStateInfo(0).normalizedTime);
+            if (animator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.9f)
+            {
+                pauseForAnim = false;
+            }
         }
 
-        if (controlsDisabled == false)
+        if ((controlsDisabled == false) && (pauseForAnim == false))
         {
             //Get the amount we should be moving and apply it
             Vector2 movement = HandleInputAxes();
@@ -97,7 +111,7 @@ public class Player : MonoBehaviour
             {
                 //Find the distances
                 Vector3 thisPos = plotsInScene[i].gameObject.transform.position;
-                float distance = (thisPos - transform.position).sqrMagnitude;
+                float distance = (thisPos - selectionPoint.position).sqrMagnitude;
 
                 //If this one is the current closest update our trackers
                 if (distance < closestPlotDistance)
@@ -115,7 +129,7 @@ public class Player : MonoBehaviour
                 {
                     //Find the distances
                     Vector3 thisPos = toolsInScene[i].gameObject.transform.position;
-                    float distance = (thisPos - transform.position).sqrMagnitude;
+                    float distance = (thisPos - selectionPoint.position).sqrMagnitude;
 
                     //If this one is the current closest update our trackers
                     if (distance < closestToolDistance)
@@ -123,6 +137,8 @@ public class Player : MonoBehaviour
                         closestToolDistance = distance;
                         closestTool = i;
                     }
+
+                    toolsInScene[i].myLight.color = Color.white;
                 }
             }
 
@@ -130,14 +146,13 @@ public class Player : MonoBehaviour
             {
                 atTool = true;
                 adjacentTool = toolsInScene[closestTool];
+                toolsInScene[closestTool].myLight.color = Color.red;
             } 
             else
             {
                 atTool = false;
                 adjacentTool = null;
             }
-
-            Debug.Log(atTool);
 
             //If we are within range of a plot
             if (atTool)
@@ -177,8 +192,12 @@ public class Player : MonoBehaviour
             }
             else if (closestPlotDistance < selectionDistance)
             {
+                if (myTool != null)
+                {
+                    mySelectionBox.SetActive(true); //Turn selection box on
+                }
+
                 currentPlot = plotsInScene[closestPlot]; //Update our gameobject reference
-                mySelectionBox.SetActive(true); //Turn selection box on
                 mySelectionBox.transform.position = currentPlot.transform.position; //Move selection box to the plot position
 
                 if (Input.GetKeyDown(interactKey) && myTool != null)
@@ -206,6 +225,59 @@ public class Player : MonoBehaviour
                     myTool.Unequip(this);
                 }
             }
+
+            SetTool();
+        }
+    }
+
+    void SetTool()
+    {
+        if (myTool != null)
+        {
+            if (myTool.toolType != ToolType.Seed)
+            {
+                switch (myTool.toolType)
+                {
+                    case ToolType.Hoe:
+                        hoeVisual.SetActive(true);
+                        axeVisual.SetActive(false);
+                        canVisual.SetActive(false);
+                        scythVisual.SetActive(false);
+                        break;
+                    case ToolType.Axe:
+                        hoeVisual.SetActive(false);
+                        axeVisual.SetActive(true);
+                        canVisual.SetActive(false);
+                        scythVisual.SetActive(false);
+                        break;
+                    case ToolType.Scythe:
+                        hoeVisual.SetActive(false);
+                        axeVisual.SetActive(false);
+                        canVisual.SetActive(false);
+                        scythVisual.SetActive(true);
+                        break;
+                    case ToolType.WateringCan:
+                        hoeVisual.SetActive(false);
+                        axeVisual.SetActive(false);
+                        canVisual.SetActive(true);
+                        scythVisual.SetActive(false);
+                        break;
+                }
+            }
+            else
+            {
+                hoeVisual.SetActive(false);
+                axeVisual.SetActive(false);
+                canVisual.SetActive(false);
+                scythVisual.SetActive(false);
+            }
+        } 
+        else
+        {
+            hoeVisual.SetActive(false);
+            axeVisual.SetActive(false);
+            canVisual.SetActive(false);
+            scythVisual.SetActive(false);
         }
     }
 
@@ -321,12 +393,17 @@ public class Player : MonoBehaviour
 
     public void AddToToolList(Tool toAdd)
     {
-        Debug.Log("Adding: " + toAdd);
         toolsInScene.Add(toAdd);
     }
 
     public void TakeFromToolList(Tool toTake)
     {
         toolsInScene.Remove(toTake);
+    }
+
+    public void ActionPause()
+    {
+        playerBody.velocity = Vector3.zero;
+        pauseForAnim = true;
     }
 }
