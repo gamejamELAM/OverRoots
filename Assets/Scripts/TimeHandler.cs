@@ -17,7 +17,6 @@ public class TimeHandler : MonoBehaviour
     int day = 1;
     int seasonNo = 0;
     float timeOfDay = 0f;
-    string season = "Spring";
 
     float handrotation = 0f;
 

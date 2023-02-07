@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
@@ -17,13 +18,7 @@ public class Player : MonoBehaviour
     public float selectionDistance = 1f;
     public float toolSelectionDistance = 2f;
 
-    [Header("Key Bindings for this player")]
-    public KeyCode upKey = KeyCode.UpArrow;
-    public KeyCode leftKey = KeyCode.LeftArrow;
-    public KeyCode downKey = KeyCode.DownArrow;
-    public KeyCode rightKey = KeyCode.RightArrow;
-    public KeyCode interactKey = KeyCode.RightControl;
-    public KeyCode unequipKey = KeyCode.RightShift;
+    public PlayerControls playerControls;
 
     //Object references
     public GameObject mySelectionBox;
@@ -43,6 +38,7 @@ public class Player : MonoBehaviour
     bool atSeedCrate = false;
     bool atTool = false;
     bool atPool = false;
+    bool atPlot = false;
 
     //Tracks the tool the player is holding
     public Tool myTool = null;
@@ -57,7 +53,31 @@ public class Player : MonoBehaviour
 
     public int wateringCanCharges = 3;
 
-    float animTime = 0;
+    Vector2 movement;
+    Vector2 rotation;
+    float angle = 0;
+
+    private void Awake()
+    {
+        playerControls = new PlayerControls();
+        playerControls.Gameplay.Enable();
+
+        //playerControls.Gameplay.Inte.performed += ctx => Interact();
+        playerControls.Gameplay.Interact.performed += ctx => Interact();
+
+        playerControls.Gameplay.UseTool.performed += ctx => UseTool();
+
+        playerControls.Gameplay.Cancel.performed += ctx => Drop();
+
+        playerControls.Gameplay.Move.performed += ctx => movement = ctx.ReadValue<Vector2>();
+        playerControls.Gameplay.Move.canceled += ctx => movement = Vector2.zero;
+
+    }
+
+    void Grow()
+    {
+        Debug.Log("grow");
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -97,11 +117,15 @@ public class Player : MonoBehaviour
         if ((controlsDisabled == false) && (pauseForAnim == false))
         {
             //Get the amount we should be moving and apply it
-            Vector2 movement = HandleInputAxes();
 
             animator.SetFloat("Movement", movement.SqrMagnitude());
 
             playerBody.velocity = new Vector3(movement.x * speed, playerBody.velocity.y, movement.y * speed);
+
+            if (movement != Vector2.zero)
+            {
+                avatar.transform.forward = new Vector3(movement.x, 0f, movement.y);
+            }
 
             //Set our closest distance to an unrealistic level
             float closestPlotDistance = 99999f;
@@ -147,83 +171,71 @@ public class Player : MonoBehaviour
                 atTool = true;
                 adjacentTool = toolsInScene[closestTool];
                 toolsInScene[closestTool].myLight.color = Color.red;
-            } 
+            }
             else
             {
                 atTool = false;
                 adjacentTool = null;
             }
 
+            if ((closestPlotDistance < selectionDistance))
+            {
+                atPlot = true;
+                mySelectionBox.SetActive(true); 
+                currentPlot = plotsInScene[closestPlot]; 
+                mySelectionBox.transform.position = currentPlot.transform.position;
+            }
+        }
+    }
+
+    void Interact()
+    {
+        if ((!pauseForAnim) && (!controlsDisabled))
+        {
             //If we are within range of a plot
             if (atTool)
             {
-                mySelectionBox.SetActive(false);
-                currentPlot = null;
-                if (Input.GetKeyDown(interactKey))
-                {
-                    //Call the interact method for the plot, passing in the appropriate tool
-                    adjacentTool.PlayerInteract(this);
-                }
-            }
-            else if (atSeedCrate)
-            {
-                mySelectionBox.SetActive(false);
-                currentPlot = null;
-
-                if (Input.GetKeyDown(interactKey))
-                {
-                    FindObjectOfType<SeedCrate>().PlayerInteract(this);
-                    controlsDisabled = true;
-                    atSeedCrate = false;
-                }
+                adjacentTool.PlayerInteract(this);
+                SetTool();
             }
             else if (atPool)
             {
-                if (Input.GetKeyDown(interactKey))
-                {
-                    if (myTool != null)
-                    {
-                        if (myTool.toolType == ToolType.WateringCan)
-                        {
-                            RefillWateringCan();
-                        }
-                    }
-                }
-            }
-            else if (closestPlotDistance < selectionDistance)
-            {
                 if (myTool != null)
                 {
-                    mySelectionBox.SetActive(true); //Turn selection box on
-                }
-
-                currentPlot = plotsInScene[closestPlot]; //Update our gameobject reference
-                mySelectionBox.transform.position = currentPlot.transform.position; //Move selection box to the plot position
-
-                if (Input.GetKeyDown(interactKey) && myTool != null)
-                {
-                    if (myTool.toolType == ToolType.Seed)
+                    if (myTool.toolType == ToolType.WateringCan)
                     {
-                        currentPlot.PlayerInteract(mySeed, myTool, this);
-                    }
-                    else
-                    {
-                        currentPlot.PlayerInteract(myTool.toolType, this);
+                        RefillWateringCan();
                     }
                 }
             }
-            else
-            {
-                mySelectionBox.SetActive(false);
-                currentPlot = null;
-            }
+        }
+    }
 
-            if (Input.GetKeyDown(unequipKey))
+    void UseTool()
+    {
+        if ((!pauseForAnim) && (!controlsDisabled))
+        {
+            if (atPlot)
             {
-                if (myTool != null)
+                if (myTool.toolType == ToolType.Seed)
                 {
-                    myTool.Unequip(this);
+                    currentPlot.PlayerInteract(mySeed, myTool, this);
                 }
+                else
+                {
+                    currentPlot.PlayerInteract(myTool.toolType, this);
+                }
+            }
+        }
+    }
+
+    void Drop()
+    {
+        if ((!pauseForAnim) && (!controlsDisabled))
+        {
+            if (myTool != null)
+            {
+                myTool.Unequip(this);
             }
 
             SetTool();
@@ -279,73 +291,6 @@ public class Player : MonoBehaviour
             canVisual.SetActive(false);
             scythVisual.SetActive(false);
         }
-    }
-
-    //Variables used for input
-    float upAxis = 0f;
-    float leftAxis = 0f;
-    float downAxis = 0f;
-    float rightAxis = 0f;
-    float horizontalAxis = 0f;
-    float verticalAxis = 0f;
-
-    Vector2 HandleInputAxes()
-    {
-        //Handle input axis - Up
-        if (Input.GetKey(upKey))
-        {
-            upAxis += Time.deltaTime * acceleration;
-            avatar.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
-        } else
-        {
-            upAxis -= Time.deltaTime * acceleration;
-        }
-
-        upAxis = Mathf.Clamp(upAxis, 0f, 1f);
-
-        //Handle input axis - Down
-        if (Input.GetKey(downKey))
-        {
-            downAxis += Time.deltaTime * acceleration;
-            avatar.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-        }
-        else
-        {
-            downAxis -= Time.deltaTime * acceleration;
-        }
-
-        downAxis = Mathf.Clamp(downAxis, 0f, 1f);
-
-        //Handle input axis - Left
-        if (Input.GetKey(leftKey))
-        {
-            leftAxis += Time.deltaTime * acceleration;
-            avatar.transform.localRotation = Quaternion.Euler(0f, 270f, 0f);
-        }
-        else
-        {
-            leftAxis -= Time.deltaTime * acceleration;
-        }
-
-        leftAxis = Mathf.Clamp(leftAxis, 0f, 1f);
-
-        //Handle input axis - Right
-        if (Input.GetKey(rightKey))
-        {
-            rightAxis += Time.deltaTime * acceleration;
-            avatar.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
-        }
-        else
-        {
-            rightAxis -= Time.deltaTime * acceleration;
-        }
-
-        rightAxis = Mathf.Clamp(rightAxis, 0f, 1f);
-
-        horizontalAxis = rightAxis - leftAxis;
-        verticalAxis = upAxis - downAxis;
-
-        return new Vector2(horizontalAxis, verticalAxis);
     }
 
     private void OnTriggerEnter(Collider other)

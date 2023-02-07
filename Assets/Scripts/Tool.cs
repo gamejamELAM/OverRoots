@@ -19,7 +19,6 @@ public class Tool : MonoBehaviour
     public GameObject seed;
     public string seedName;
 
-    bool isEquipped = false;
     BoxCollider[] myColliders;
     Rigidbody myRigidbody;
 
@@ -63,7 +62,6 @@ public class Tool : MonoBehaviour
         player.mySeed = seed;
 
         equippedPlayer = player;
-        isEquipped = true;
     }
 
     public void Unequip(Player player)
@@ -83,7 +81,6 @@ public class Tool : MonoBehaviour
         }
 
         equippedPlayer = null;
-        isEquipped = false;
     }
 
     public void Consume(Player player)
