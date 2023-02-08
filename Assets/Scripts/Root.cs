@@ -20,6 +20,8 @@ public class Root : MonoBehaviour
 
     public bool shouldRotate = true;
 
+    public bool pause = true;
+
     // Start is called before the first frame update
     public void Start()
     {
@@ -35,61 +37,64 @@ public class Root : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (fullyGrown == false)
+        if (!pause)
         {
-            float currentScale = transform.localScale.y;
-            currentScale += (1.0f * Time.deltaTime);
-
-            if (currentScale > 1.0f)
+            if (fullyGrown == false)
             {
-                fullyGrown = true;
+                float currentScale = transform.localScale.y;
+                currentScale += (1.0f * Time.deltaTime);
+
+                if (currentScale > 1.0f)
+                {
+                    fullyGrown = true;
+                }
+                else
+                {
+                    transform.localScale = new Vector3(1f, currentScale, 1f);
+                }
             }
             else
             {
-                transform.localScale = new Vector3(1f, currentScale, 1f);
-            }
-        }
-        else
-        {
-            if (timeToPropagate > 0)
-            {
-                timeToPropagate -= Time.deltaTime;
-            }
-            else if (hasSpawned == false)
-            {
-                //Set our closest distance to an unrealistic level
-                float closestDistance = 99999f;
-
-                //Loop through the list of available plots and find the closest
-                for (int i = 0; i < plotsInScene.Length; i++)
+                if (timeToPropagate > 0)
                 {
-                    if (plotsInScene[i].myState != PlotState.Rooted)
-                    {
-                        //Find the distances
-                        Vector3 thisPos = plotsInScene[i].gameObject.transform.position;
-                        float distance = (thisPos - transform.position).sqrMagnitude;
+                    timeToPropagate -= Time.deltaTime;
+                }
+                else if (hasSpawned == false)
+                {
+                    //Set our closest distance to an unrealistic level
+                    float closestDistance = 99999f;
 
-                        //If this one is the current closest update our trackers
-                        if (distance < closestDistance)
+                    //Loop through the list of available plots and find the closest
+                    for (int i = 0; i < plotsInScene.Length; i++)
+                    {
+                        if (plotsInScene[i].myState != PlotState.Rooted)
                         {
-                            closestDistance = distance;
-                            closestPlot = i;
+                            //Find the distances
+                            Vector3 thisPos = plotsInScene[i].gameObject.transform.position;
+                            float distance = (thisPos - transform.position).sqrMagnitude;
+
+                            //If this one is the current closest update our trackers
+                            if (distance < closestDistance)
+                            {
+                                closestDistance = distance;
+                                closestPlot = i;
+                            }
                         }
                     }
-                }
 
-                if (closestPlot != -1)
+                    if (closestPlot != -1)
+                    {
+                        plotsInScene[closestPlot].GetRooted();
+                        rootThatISpawned = plotsInScene[closestPlot].myRoot.GetComponent<Root>();
+
+                        hasSpawned = true;
+                    }
+                }
+                else if (!rootThatISpawned.isActiveAndEnabled)
                 {
-                    plotsInScene[closestPlot].GetRooted();
-                    rootThatISpawned = plotsInScene[closestPlot].myRoot.GetComponent<Root>();
-
-                    hasSpawned = true;
+                    hasSpawned = false;
+                    timeToPropagate = 1.0f;
                 }
-            } 
-            else if (!rootThatISpawned.isActiveAndEnabled)
-            {
-                hasSpawned = false;
-                timeToPropagate = 1.0f;
             }
         }
     }

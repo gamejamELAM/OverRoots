@@ -6,8 +6,6 @@ using UnityEngine.InputSystem;
 
 public class SeedCrate : MonoBehaviour
 {
-    PlayerControls playerControls;
-
     public Transform creationPoint;
     public GameObject seedCratePanel;
     public RectTransform startPoint;
@@ -15,34 +13,23 @@ public class SeedCrate : MonoBehaviour
     public GameObject[] seeds;
     float spacing = -45f;
 
-    Player activePlayer;
     bool active = false;
 
     List<Image> images = new List<Image>();
     int selection = 0;
 
-    Player[] playersInScene;
+    public List<Player> playersInScene;
 
     private void Awake()
     {
-        playerControls = new PlayerControls();
-        playerControls.Gameplay.Enable();
-
-        //playerControls.Gameplay.Inte.performed += ctx => Interact();
-        playerControls.Gameplay.MenuUp.performed += ctx => MenuUp();
-
-        playerControls.Gameplay.MenuDown.performed += ctx => MenuDown();
-
-        playerControls.Gameplay.Interact.performed += ctx => Interact();
-
-        playerControls.Gameplay.Cancel.performed += ctx => Cancel();
+        playersInScene = new List<Player>();
     }
+
+    public Player activePlayer;
 
     // Start is called before the first frame update
     void Start()
     {
-        playersInScene = FindObjectsOfType<Player>();
-
         for (int i = 0; i < seeds.Length; i++)
         {
             GameObject choice = Instantiate(optionButton, startPoint.position + new Vector3(0f, i * spacing, 0f), Quaternion.identity, seedCratePanel.transform);
@@ -53,64 +40,56 @@ public class SeedCrate : MonoBehaviour
         seedCratePanel.SetActive(false);
     }
 
-    void MenuUp()
-    {
-        if (active)
-        {
-            selection--;
-            selection = Mathf.Clamp(selection, 0, images.Count - 1);
-        }
-    }
-
-    void MenuDown()
-    {
-        if (active)
-        {
-            selection++;
-            selection = Mathf.Clamp(selection, 0, images.Count - 1);
-        }
-    }
-
-    void Interact()
+    public void MenuUp(Player play)
     {
         if (activePlayer != null)
         {
-            if (active)
+            if (activePlayer == play)
             {
-                GameObject seed = Instantiate(seeds[selection], creationPoint.position, Quaternion.identity);
-                seed.GetComponent<Rigidbody>().velocity = new Vector3(0f, 3f, -3f);
+                selection--;
+                selection = Mathf.Clamp(selection, 0, images.Count - 1);
 
-                foreach (Player player in playersInScene)
+                seedCratePanel.SetActive(true);
+
+                for (int i = 0; i < images.Count; i++)
                 {
-                    player.AddToToolList(seed.GetComponent<Tool>());
+                    images[i].color = Color.white;
                 }
 
-                selection = 0;
-                seedCratePanel.SetActive(false);
-                activePlayer.controlsDisabled = false;
-            }
-            else
-            {
-                active = true;
-                seedCratePanel.SetActive(true);
-                activePlayer.controlsDisabled = true;
+                images[selection].color = Color.red;
             }
         }
     }
 
-    void Cancel()
+    public void MenuDown(Player play)
     {
-        Debug.Log("Cancel");
-        selection = 0;
-        seedCratePanel.SetActive(false);
-        activePlayer.controlsDisabled = false;
+        if (activePlayer != null)
+        {
+            if (activePlayer == play)
+            {
+                selection++;
+                selection = Mathf.Clamp(selection, 0, images.Count - 1);
+
+                seedCratePanel.SetActive(true);
+
+                for (int i = 0; i < images.Count; i++)
+                {
+                    images[i].color = Color.white;
+                }
+
+                images[selection].color = Color.red;
+            }
+        }
     }
 
-    private void Update()
+    public void Interact(Player play)
     {
-        if (active)
+        if (activePlayer == null)
         {
             seedCratePanel.SetActive(true);
+            activePlayer = play;
+            play.controlsDisabled = true;
+            selection = 0;
 
             for (int i = 0; i < images.Count; i++)
             {
@@ -118,14 +97,32 @@ public class SeedCrate : MonoBehaviour
             }
 
             images[selection].color = Color.red;
+        } 
+        else if (activePlayer == play)
+        {
+            GameObject seed = Instantiate(seeds[selection], creationPoint.position, Quaternion.identity);
+            seed.GetComponent<Rigidbody>().velocity = new Vector3(0f, 3f, -3f);
+
+            foreach (Player player in playersInScene)
+            {
+                player.AddToToolList(seed.GetComponent<Tool>());
+            }
+
+            Cancel(play);
         }
     }
 
-    private void OnTriggerStay(Collider collision)
+    public void Cancel(Player play)
     {
-        if (collision.tag == "Player")
+        if (activePlayer != null)
         {
-            activePlayer = collision.gameObject.GetComponent<Player>();
+            if (activePlayer == play)
+            {
+                active = false;
+                seedCratePanel.SetActive(false);
+                activePlayer = null;
+                play.controlsDisabled = false;
+            }
         }
     }
 }

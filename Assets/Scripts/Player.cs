@@ -32,6 +32,8 @@ public class Player : MonoBehaviour
 
     public Transform selectionPoint;
 
+    public bool pause = false;
+
     //Management variables
     int closestPlot = -1;
     int closestTool = -1;
@@ -57,31 +59,20 @@ public class Player : MonoBehaviour
     Vector2 rotation;
     float angle = 0;
 
-    private void Awake()
+    SeedCrate seedCrate;
+    public Material hat;
+
+    public void Move(InputAction.CallbackContext ctx)
     {
-        playerControls = new PlayerControls();
-        playerControls.Gameplay.Enable();
-
-        //playerControls.Gameplay.Inte.performed += ctx => Interact();
-        playerControls.Gameplay.Interact.performed += ctx => Interact();
-
-        playerControls.Gameplay.UseTool.performed += ctx => UseTool();
-
-        playerControls.Gameplay.Cancel.performed += ctx => Drop();
-
-        playerControls.Gameplay.Move.performed += ctx => movement = ctx.ReadValue<Vector2>();
-        playerControls.Gameplay.Move.canceled += ctx => movement = Vector2.zero;
-
-    }
-
-    void Grow()
-    {
-        Debug.Log("grow");
+        movement = ctx.ReadValue<Vector2>();
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        seedCrate = FindObjectOfType<SeedCrate>();
+        seedCrate.playersInScene.Add(this);
+
         //Find various gameobject references
         playerBody = GetComponent<Rigidbody>();
 
@@ -100,6 +91,12 @@ public class Player : MonoBehaviour
         //Distances are returned squared, so we need to square our selection distance
         selectionDistance = selectionDistance * selectionDistance;
         toolSelectionDistance = toolSelectionDistance * toolSelectionDistance;
+
+        if (FindObjectsOfType<Player>().Length > 1)
+        {
+            SkinnedMeshRenderer skm = GetComponentInChildren<SkinnedMeshRenderer>();
+            skm.materials[0].color = new Color(Random.value, Random.value, Random.value);
+        }
     }
 
     // Update is called once per frame
@@ -181,64 +178,112 @@ public class Player : MonoBehaviour
             if ((closestPlotDistance < selectionDistance))
             {
                 atPlot = true;
-                mySelectionBox.SetActive(true); 
-                currentPlot = plotsInScene[closestPlot]; 
+                mySelectionBox.SetActive(true);
+                currentPlot = plotsInScene[closestPlot];
                 mySelectionBox.transform.position = currentPlot.transform.position;
             }
         }
     }
 
-    void Interact()
+    public void Interact(InputAction.CallbackContext ctx)
     {
-        if ((!pauseForAnim) && (!controlsDisabled))
+        if (ctx.performed == true)
         {
-            //If we are within range of a plot
-            if (atTool)
+            if (!pauseForAnim)
             {
-                adjacentTool.PlayerInteract(this);
-                SetTool();
-            }
-            else if (atPool)
-            {
-                if (myTool != null)
+                if (atTool)
                 {
-                    if (myTool.toolType == ToolType.WateringCan)
+                    adjacentTool.PlayerInteract(this);
+                    SetTool();
+                }
+                else if (atPool)
+                {
+                    if (myTool != null)
                     {
-                        RefillWateringCan();
+                        if (myTool.toolType == ToolType.WateringCan)
+                        {
+                            RefillWateringCan();
+                        }
+                    }
+                } 
+                else if (atSeedCrate)
+                {
+                    seedCrate.Interact(this);
+                } 
+                else if (atPool)
+                {
+                    RefillWateringCan();
+                }
+            }
+        }
+    }
+
+    public void UseTool(InputAction.CallbackContext ctx)
+    {
+        if (ctx.performed == true)
+        {
+            if (myTool != null)
+            {
+                if ((!pauseForAnim) && (!controlsDisabled))
+                {
+                    if (atPlot)
+                    {
+                        if (myTool.toolType == ToolType.Seed)
+                        {
+                            currentPlot.PlayerInteract(mySeed, myTool, this);
+                        }
+                        else
+                        {
+                            currentPlot.PlayerInteract(myTool.toolType, this);
+                        }
                     }
                 }
             }
         }
     }
 
-    void UseTool()
+    public void Drop(InputAction.CallbackContext ctx)
     {
-        if ((!pauseForAnim) && (!controlsDisabled))
+        if (ctx.performed == true)
         {
-            if (atPlot)
+            if (seedCrate != null)
             {
-                if (myTool.toolType == ToolType.Seed)
+                if (seedCrate.activePlayer == this)
                 {
-                    currentPlot.PlayerInteract(mySeed, myTool, this);
+                    seedCrate.Cancel(this);
                 }
-                else
+            }
+            if ((!pauseForAnim) && (!controlsDisabled))
+            {
+                if (myTool != null)
                 {
-                    currentPlot.PlayerInteract(myTool.toolType, this);
+                    myTool.Unequip(this);
                 }
+
+                SetTool();
             }
         }
     }
 
-    void Drop()
+    public void MenuUp(InputAction.CallbackContext ctx)
     {
-        if ((!pauseForAnim) && (!controlsDisabled))
+        if (ctx.canceled == true)
         {
-            if (myTool != null)
+            if (seedCrate != null)
             {
-                myTool.Unequip(this);
+                seedCrate.MenuUp(this);
             }
+        }
+    }
 
-            SetTool();
+    public void MenuDown(InputAction.CallbackContext ctx)
+    {
+        if (ctx.canceled == true)
+        {
+            if (seedCrate != null)
+            {
+                seedCrate.MenuDown(this);
+            }
         }
     }
 
